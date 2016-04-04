@@ -73,7 +73,7 @@ public class ActivityMain extends AppCompatActivity implements SharedPreferences
     private ImageView ivQueue;
     private SwitchCompat swEnabled;
     private ImageView ivMetered;
-    private SwipeRefreshLayout swipeRefresh;
+
     private AdapterRule adapter = null;
     private MenuItem menuSearch = null;
     private AlertDialog dialogFirst = null;
@@ -115,7 +115,7 @@ public class ActivityMain extends AppCompatActivity implements SharedPreferences
         Util.setTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
+        swEnabled = (SwitchCompat) findViewById(R.id.swEnabled);
         running = true;
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -136,7 +136,7 @@ public class ActivityMain extends AppCompatActivity implements SharedPreferences
         final View actionView = getLayoutInflater().inflate(R.layout.actionmain, null, false);
         ivIcon = (ImageView) actionView.findViewById(R.id.ivIcon);
         ivQueue = (ImageView) actionView.findViewById(R.id.ivQueue);
-        swEnabled = (SwitchCompat) actionView.findViewById(R.id.swEnabled);
+
         ivMetered = (ImageView) actionView.findViewById(R.id.ivMetered);
 
         // Icon
@@ -250,26 +250,26 @@ public class ActivityMain extends AppCompatActivity implements SharedPreferences
         tvDisabled.setVisibility(enabled ? View.GONE : View.VISIBLE);
 
         // Application list
-        RecyclerView rvApplication = (RecyclerView) findViewById(R.id.rvApplication);
-        rvApplication.setHasFixedSize(true);
-        rvApplication.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new AdapterRule(this);
-        rvApplication.setAdapter(adapter);
+//        RecyclerView rvApplication = (RecyclerView) findViewById(R.id.rvApplication);
+//        rvApplication.setHasFixedSize(true);
+//        rvApplication.setLayoutManager(new LinearLayoutManager(this));
+//        adapter = new AdapterRule(this);
+//        rvApplication.setAdapter(adapter);
 
         // Swipe to refresh
         TypedValue tv = new TypedValue();
         getTheme().resolveAttribute(R.attr.colorPrimary, tv, true);
-        swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
-        swipeRefresh.setColorSchemeColors(Color.WHITE, Color.WHITE, Color.WHITE);
-        swipeRefresh.setProgressBackgroundColorSchemeColor(tv.data);
-        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                Rule.clearCache(ActivityMain.this);
-                ServiceSinkhole.reload("pull", ActivityMain.this);
-                updateApplicationList(null);
-            }
-        });
+//        swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
+//        swipeRefresh.setColorSchemeColors(Color.WHITE, Color.WHITE, Color.WHITE);
+//        swipeRefresh.setProgressBackgroundColorSchemeColor(tv.data);
+//        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+//            @Override
+//            public void onRefresh() {
+//                Rule.clearCache(ActivityMain.this);
+//                ServiceSinkhole.reload("pull", ActivityMain.this);
+//                updateApplicationList(null);
+//            }
+//        });
 
         // Listen for preference changes
         prefs.registerOnSharedPreferenceChangeListener(this);
@@ -588,16 +588,7 @@ public class ActivityMain extends AppCompatActivity implements SharedPreferences
         new AsyncTask<Object, Object, List<Rule>>() {
             private boolean refreshing = true;
 
-            @Override
-            protected void onPreExecute() {
-                swipeRefresh.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (refreshing)
-                            swipeRefresh.setRefreshing(true);
-                    }
-                });
-            }
+
 
             @Override
             protected List<Rule> doInBackground(Object... arg) {
@@ -612,10 +603,7 @@ public class ActivityMain extends AppCompatActivity implements SharedPreferences
                         updateSearch(search);
                     }
 
-                    if (swipeRefresh != null) {
-                        refreshing = false;
-                        swipeRefresh.setRefreshing(false);
-                    }
+
                 }
             }
         }.execute();
