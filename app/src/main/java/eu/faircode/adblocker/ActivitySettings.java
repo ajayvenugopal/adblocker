@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -61,6 +62,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -69,6 +74,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -107,6 +113,11 @@ public class ActivitySettings extends AppCompatActivity implements SharedPrefere
     private AlertDialog dialogFilter = null;
 
     private static final Intent INTENT_VPN_SETTINGS = new Intent("android.net.vpn.SETTINGS");
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     protected void onCreate(Bundle savedInstanceState) {
         Util.setTheme(this);
@@ -114,6 +125,9 @@ public class ActivitySettings extends AppCompatActivity implements SharedPrefere
         getFragmentManager().beginTransaction().replace(android.R.id.content, new FragmentSettings()).commit();
         getSupportActionBar().setTitle(R.string.menu_settings);
         running = true;
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     private PreferenceScreen getPreferenceScreen() {
@@ -268,7 +282,17 @@ public class ActivitySettings extends AppCompatActivity implements SharedPrefere
             cat_backup.removePreference(pref_hosts_download);
 
         } else {
-            pref_block_domains.setEnabled(new File(getFilesDir(), "hosts.txt").exists());
+            try {
+
+                AssetManager am = getAssets();
+
+                InputStream inputStream = getResources().openRawResource(R.raw.hosts);
+                File hfile = createFileFromInputStream(inputStream);
+
+                pref_block_domains.setEnabled(hfile.exists());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             String last_import = prefs.getString("hosts_last_import", null);
             String last_download = prefs.getString("hosts_last_download", null);
@@ -288,13 +312,14 @@ public class ActivitySettings extends AppCompatActivity implements SharedPrefere
                 }
             });
 
+
             // Handle hosts file download
             pref_hosts_url.setSummary(pref_hosts_url.getText());
             pref_hosts_download.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     final File tmp = new File(getFilesDir(), "hosts.tmp");
-                    final File hosts = new File(getFilesDir(), "hosts.txt");
+                    final File hosts = new File(getFilesDir(), "host/hosts.txt");
                     EditTextPreference pref_hosts_url = (EditTextPreference) screen.findPreference("hosts_url");
                     try {
                         new DownloadTask(ActivitySettings.this, new URL(pref_hosts_url.getText()), tmp, new DownloadTask.Listener() {
@@ -376,7 +401,28 @@ public class ActivitySettings extends AppCompatActivity implements SharedPrefere
         pref_technical_subscription.setOnPreferenceClickListener(listener);
         updateTechnicalInfo();
     }
+    private File createFileFromInputStream(InputStream inputStream) {
 
+        try{
+            File f = new File("host/hosts.txt");
+            OutputStream outputStream = new FileOutputStream(f);
+            byte buffer[] = new byte[1024];
+            int length = 0;
+
+            while((length=inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer,0,length);
+            }
+
+            outputStream.close();
+            inputStream.close();
+
+            return f;
+        }catch (IOException e) {
+            //Logging exception
+        }
+
+        return null;
+    }
     @Override
     protected void onResume() {
         super.onResume();
@@ -882,7 +928,7 @@ public class ActivitySettings extends AppCompatActivity implements SharedPrefere
         new AsyncTask<Object, Object, Throwable>() {
             @Override
             protected Throwable doInBackground(Object... objects) {
-                File hosts = new File(getFilesDir(), "hosts.txt");
+                File hosts = new File(getFilesDir(), "host/hosts.txt");
 
                 FileOutputStream out = null;
                 InputStream in = null;
@@ -1185,6 +1231,46 @@ public class ActivitySettings extends AppCompatActivity implements SharedPrefere
         }
 
         editor.apply();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "ActivitySettings Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://eu.faircode.adblocker/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "ActivitySettings Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://eu.faircode.adblocker/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 
     private class XmlImportHandler extends DefaultHandler {

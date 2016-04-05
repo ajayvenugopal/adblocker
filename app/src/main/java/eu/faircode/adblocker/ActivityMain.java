@@ -662,6 +662,8 @@ public class ActivityMain extends AppCompatActivity implements SharedPreferences
         }
     }
 
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (Build.VERSION.SDK_INT < MIN_SDK)

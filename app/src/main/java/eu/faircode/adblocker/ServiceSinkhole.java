@@ -1106,7 +1106,7 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
     private void prepareHostsBlocked() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ServiceSinkhole.this);
         boolean use_hosts = prefs.getBoolean("filter", false) && prefs.getBoolean("use_hosts", false);
-        File hosts = new File(getFilesDir(), "hosts.txt");
+        File hosts = new File(getFilesDir(), "host/hosts.txt");
         if (!use_hosts || !hosts.exists() || !hosts.canRead()) {
             Log.i(TAG, "Hosts file use=" + use_hosts + " exists=" + hosts.exists());
             mapHostsBlocked.clear();

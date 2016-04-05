@@ -10,6 +10,7 @@
     <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <!-- http://developer.android.com/guide/topics/security/permissions.html#normal-dangerous -->
 
     <uses-feature
@@ -142,6 +143,10 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget" />
-        </receiver>
+        </receiver><!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+     App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
     </application>
 </manifest>
